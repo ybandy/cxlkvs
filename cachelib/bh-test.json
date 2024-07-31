@@ -1,0 +1,73 @@
+// @nolint uses workload where the objects all fit within the small object cache
+{
+  "cache_config" : {
+    "navyTryBlocking" : true,
+    "disableItemReaper" : true,
+
+    "prefetchDelayNSec" : 5000,
+    "numPools" : 8,
+    "htBucketPower" : 30,
+    "poolSizes" : [0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625],
+    "cacheSizeMB" : 16384,
+    "maxAllocSize" : 512,
+    "allocFactor" : 1.06,
+    "cacheDir": "/tmp/mem-tier",
+    "memoryTiers" : [
+      {
+        "ratio": 1,
+        "memBindNodes": "0"
+      }
+    ],
+    "poolRebalanceIntervalSec" : 0,
+    "moveOnSlabRelease" : true,
+
+    "nvmCachePaths": ["/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM28090019Q480BGN",
+                      "/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM2813300BX480BGN",
+                      "/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM28134000W480BGN",
+                      "/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM2813400GC480BGN"],
+    "nvmCacheSizeMB" : 0,
+    "navyBigHashSizePct": 90,
+    "navySmallItemMaxSize": 2048
+  },
+  "test_config" :
+    {
+      "sigmaFactor": 1.0,
+      //"enableLookaside": true,
+
+      "keyPoolDistribution": [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+      "opPoolDistribution" : [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+
+      "generator": "online",
+      "numFibers" : 10,
+      "affinitizeThreads" : true,
+      "yieldPerOps" : 0,
+      "touchValue" : false,
+      "populateItem" : false,
+
+      "numOps" : 200000000,
+      "numThreads" : 18,
+      "numKeys" : 45000000,
+
+      "keySizeRange" : [8, 16],
+      "keySizeRangeProbability" : [1.0],
+
+      "valSizeRange" : [200, 300],
+      "valSizeRangeProbability" : [1.0],
+
+      "chainedItemLengthRange" : [1, 2],
+      "chainedItemLengthRangeProbability" : [1.0],
+
+      "chainedItemValSizeRange" : [500, 600],
+      "chainedItemValSizeRangeProbability" : [1.0],
+
+      "getRatio" : 0.65,
+      "setRatio" : 0.3,
+      "delRatio" : 0.05,
+      //"getRatio" : 0.64,
+      //"loneGetRatio" : 0.01,
+      //"setRatio" : 0.3,
+      //"delRatio" : 0.05,
+      "addChainedRatio" : 0.0
+    }
+
+}
