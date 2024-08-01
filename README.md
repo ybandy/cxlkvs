@@ -71,3 +71,81 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
    sudo cpupower frequency-set -g performance
    ```
 
+## Microbenchmark
+
+1. Build
+
+   ```
+   cd microbench
+   ./build.sh
+   ```
+
+1. Run
+
+   ```
+   python3 batch.py
+   ```
+   This will run the microbenchmark with various combinations of parameters.
+
+1. Check results
+
+   Open and run Jupyter Notebook `notebooks/microbench.ipynb`
+
+
+## Modified Aerospike
+
+1. Build
+
+   ```
+   cd aerospike
+   ./build.sh
+   ```
+
+1. Edit the server config
+
+   Edit `aerospike-server/as/etc/aerospike_dev.conf` according to your environment.
+
+   * Specify SSDs (`device`)
+     
+     Using device symbolic links is recommended over direct specification such as `/dev/nvme0n1`, as the latter can change upon reboot.
+     ```
+     device /dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM28090019Q480BGN
+     device /dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM2813300BX480BGN
+     device /dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM28134000W480BGN
+     device /dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM2813400GC480BGN
+     ```
+     
+   * Specify the number of CPU cores (`service-xstreams`)
+     
+     {1, 2, 4, 8, 16} in our evaluation
+     
+   * Specify which NUMA node memory to use (`node-mask`)
+     
+     For instance, in an environment with
+     * Node 0: host DRAM (CPU 0)
+     * Node 1: host DRAM (CPU 1)
+     * Node 2: CXL memory device 0
+     * Node 3: CXL memory device 1
+     
+     Node mask will be 1 (= 1 << 0) for the host DRAM, and 12 (= 1 << 2 | 1 << 3) for the (interleaved) CXL memory devices.
+
+1. Select a benchmark config file and edit it as necessary
+
+   The naming convention is `run-act-<type>-<memory>-<N>core.conf`, where
+
+   * `<type>`: `ro` for read-only workload, `rw` for read-write-mix workload
+   * `<memory>`: `dram` for DRAM, `cxl` for CXL memory
+   * `<N>`: the number of CPU cores
+  
+   `SERVER_CPU_LIST` and `CLIENT_CPU_LIST` may need to be edited so that servers work on CPU 0 and clients on CPU 1.
+
+1. Run the selected benchmark
+
+   ```
+   nohup bash run-act.sh run-act-<type>-<memory>-<N>core.conf &
+   ```
+   `nohup` is recommended because each benchmark can take hours.
+
+1. Check the results
+
+   Open and run Jupyter Notebook `notebooks/aerospike.ipynb`
