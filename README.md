@@ -51,7 +51,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
    echo 24 >  /sys/module/nvme/parameters/poll_queues
    for i in 5a 5b 5c 5d; do echo 0000:$i:00.0 > bind; done
    ```
-   Note that you need to change the PCIe device ID (such as 0000:5a:00.0) according to your environment.
+   Note that you need to change the PCIe device ID (such as `0000:5a:00.0`) according to your environment.
    
 1. Disable simultaneous multithreading (SMT)
 
@@ -131,9 +131,8 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 
 1. Select a benchmark config file and edit it as necessary
 
-   The naming convention is `run-act-<type>-<memory>-<N>core.conf`, where
-
-   * `<type>`: `ro` for read-only workload, `rw` for read-write-mix workload
+   The naming convention is `run-act-<workload>-<memory>-<N>core.conf`, where
+   * `<workload>`: `ro` for read-only workload, `rw` for read-write-mix workload
    * `<memory>`: `dram` for DRAM, `cxl` for CXL memory
    * `<N>`: the number of CPU cores
   
@@ -142,10 +141,106 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 1. Run the selected benchmark
 
    ```
-   nohup bash run-act.sh run-act-<type>-<memory>-<N>core.conf &
+   nohup bash run-act.sh run-act-<workload>-<memory>-<N>core.conf &
    ```
    `nohup` is recommended because each benchmark can take hours.
 
 1. Check the results
 
    Open and run Jupyter Notebook `notebooks/aerospike.ipynb`
+
+
+## Modified CacheLib
+
+1. Build
+
+   ```
+   cd cachelib
+   ./build
+   ```
+
+1. Edit the workload configs
+
+   Two workload configs are provided:
+   * `bh-test.json`: smaller workload with 100 million items
+   * `bh-test-x4.json`: larger workload with 400 million items
+
+   In each file, specify SSDs as the NVM (tier-2) cache.
+   ```
+   "nvmCachePaths": ["/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM28090019Q480BGN",
+                     "/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM2813300BX480BGN",
+                     "/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM28134000W480BGN",
+                     "/dev/disk/by-id/nvme-INTEL_SSDPE21D480GA_PHM2813400GC480BGN"],
+   ```
+
+1. Select a benchmark config and edit it as necessary
+
+   The naming convention is `cachelib-benchmark<workload>-<memory>-<N>core-<M>fiber.conf` where
+   * `<workload>`: ` ` (empty) for the smaller workload, `-x4` for the larger workload
+   * `<memory>`: `dram` for DRAM, `cxl` for CXL memory
+   * `<N>`: the number of CPU cores
+   * `<M>`: the number of threads (fibers) per core
+
+   `CACHE_CONFIG_MEMBIND_NODES` may need to be changed depending on the NUMA node assignment.
+   Note that the way of specifying a node mask is different from Aerospike: if you want to interleave Nodes 2 and 3, specify `"\"2,3\""`.
+
+   `CACHE_CONFIG_NVM_CACHE_SIZE_MB` specifies a size *per SSD*.
+   We assume four devices are specified in the workload config, and the value here is a quarter of the intended total NVM cache size.
+   Change this value accordingly if you use a different number of SSDs.
+
+1. Run the selected benchmark
+
+   If placing the RAM (tier-1) cache on the host DRAM, run
+   ```
+   nohup taskset -c <cpu_list> bash benchmark.sh cachelib-benchmark<workload>-dram-<N>core-<M>fiber.conf &
+   ```
+   `<cpu_list>` needs to be consistent with `<N>`. For example, it should be `0` if N = 1, and `0-15` if N = 16.
+
+   Once the benchmark has started, wait until the stats (per-minute throughput, hit ratios, etc.) stabilize.
+   It can take hours, but you do not have to wait until the benchmark ends (it would take days).
+   You can tell if it has stabilized by checking if the NVM hit ratio has exceeded 73.3% for the provided workloads.
+   ```
+   ...
+   23:56:38   24037.30M ops completed. Hit Ratio  82.37% (RAM  33.84%, NVM  73.35%)
+   23:57:38   24123.93M ops completed. Hit Ratio  82.37% (RAM  33.83%, NVM  73.35%)
+   23:58:38   24210.67M ops completed. Hit Ratio  82.37% (RAM  33.83%, NVM  73.36%)
+   ```
+   Then, you can terminate the benchmark in the middle.
+   ```
+   killall cachebench
+   ```
+
+   If placing the RAM cache on the CXL memory, run
+   ```
+   bash ~/set_latency.sh 1
+   nohup taskset -c <cpu_list> bash benchmark.sh cachelib-benchmark<workload>-cxl-<N>core-<M>fiber.conf &
+   ```
+   The reason for setting the latency to minimum is because this shortens the time until the benchmark stabilizes.
+   Once it has stabilized, we lenghthen the latency gradually at some time interval
+   (typically 30 minutes is enough for the benchmark to stabilize again with the new memory latency).
+   For instance, if we know the benchmark stabilizes in four hours after its launch, we can run the following script: 
+   ```
+   sleep $((4 * 60 * 60))
+   
+   for cxl_latency in 500 1000 2000 3000 4000 5000 10000; do
+       date
+       bash $HOME/set_latency.sh $cxl_latency
+       sleep $((30 * 60))
+   done
+   
+   killall cachebench
+   $HOME/set_latency.sh
+   ```
+
+1. Check the results
+
+   Open and run Jupyter Notebook `notebooks/cachelib.ipynb`
+
+
+## Other Results
+
+If all the results so far have been obtained, open and run Jupyter Notebook `notebooks/multicore.ipynb`
+to plot throughputs of both Aerospike and CacheLib for varying number of cores.
+
+Jupyter Notebook `notebooks/model.ipynb` is a stand-alone notebook that can be run without evaluation logs.
+It produces heatmaps showing throughput dependency on memory latency according to a theoretical model.
