@@ -97,8 +97,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 1. Build
 
    ```
-   cd aerospike
-   ./build.sh
+   ./aerospike/build.sh
    ```
 
 1. Edit the server config
@@ -141,6 +140,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 1. Run the selected benchmark
 
    ```
+   cd aerospike
    nohup bash run-act.sh run-act-<workload>-<memory>-<N>core.conf &
    ```
    `nohup` is recommended because each benchmark can take hours.
@@ -155,8 +155,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 1. Build
 
    ```
-   cd cachelib
-   ./build
+   ./cachelib/build.sh
    ```
 
 1. Edit the workload configs
@@ -192,6 +191,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 
    If placing the RAM (tier-1) cache on the host DRAM, run
    ```
+   cd cachelib
    nohup taskset -c <cpu_list> bash benchmark.sh cachelib-benchmark<workload>-dram-<N>core-<M>fiber.conf &
    ```
    `<cpu_list>` needs to be consistent with `<N>`. For example, it should be `0` if N = 1, and `0-15` if N = 16.
