@@ -47,9 +47,9 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 1. Enable SSD polling
 
    ```
-   for i in 5a 5b 5c 5d; do echo 0000:$i:00.0 > unbind; done
+   for i in 5a 5b 5c 5d; do echo 0000:$i:00.0 > /sys/bus/pci/drivers/nvme/unbind; done
    echo 24 >  /sys/module/nvme/parameters/poll_queues
-   for i in 5a 5b 5c 5d; do echo 0000:$i:00.0 > bind; done
+   for i in 5a 5b 5c 5d; do echo 0000:$i:00.0 > /sys/bus/pci/drivers/nvme/bind; done
    ```
    Note that you need to change the PCIe device ID (such as `0000:5a:00.0`) according to your environment.
    
