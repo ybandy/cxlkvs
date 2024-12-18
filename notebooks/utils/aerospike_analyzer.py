@@ -13,16 +13,16 @@ def parse_logs(log_file_list, mem_latency_list):
             exit(1)
         server_threads = int(m.group(1))
         data = parse(log_file)
-        cur_batch_read = 0
+        cur_client_threads = 0
         mem_latency_idx = -1
         for d in data:
             if(d['read'] is not None and d['async'] == 'false'):
-                if(d['batch_read'] == 1 and cur_batch_read != 1):
+                if(cur_client_threads > d['client_threads']):
                     mem_latency_idx += 1
                     cur_mem_latency = mem_latency_list[mem_latency_idx]
-                cur_batch_read = d['batch_read']
                 d['server_threads'] = server_threads
                 log_dict[cur_mem_latency].append(d)
+            cur_client_threads = d['client_threads']
     return log_dict
 
 

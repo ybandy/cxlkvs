@@ -10,11 +10,7 @@ def plot_throughputs(mem_latency_list, throughput_list, top, color, title, filen
     xlabels = []
     y = []
     for lat, t in zip(mem_latency_list, throughput_list):
-        if(lat > 1000 and lat % 1000 == 500):
-            continue
-        elif(lat > 15000):
-            continue
-        elif(lat == 0):
+        if(lat == 0):
             xlabels.append('DRAM\n0.1')
         else:
             xlabels.append('CXL\n%.1f' % (lat / 1000))
@@ -121,10 +117,6 @@ def plot_latencies(mem_latency_list, op_latency_list, p_list, batch, title, file
 
     xlabels = []
     for ml in mem_latency_list:
-        if(ml > 1000 and ml % 1000 == 500):
-            continue
-        elif(ml > 15000):
-            continue
         if(ml == 0):
             xlabels.append('DRAM\n0.1')
         else:
@@ -139,10 +131,6 @@ def plot_latencies(mem_latency_list, op_latency_list, p_list, batch, title, file
     for i, p in enumerate(p_list):
         y = []
         for ml, opl in zip(mem_latency_list, op_latency_list):
-            if(ml > 1000 and ml % 1000 == 500):
-                continue
-            elif(ml > 15000):
-                continue
             y.append(opl['latency_p%d' % p] / batch)
         plt.bar(x + (i - n/2 + 0.5) * width, y, width=width * 0.8, label='P%d' % p,
                 color=COLOR_LIST[i])
