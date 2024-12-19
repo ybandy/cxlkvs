@@ -251,13 +251,13 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 
    Set up a file system on an SSD (or on RAIDed SSDs), as RocksDB needs one in contrast to Aerospike and CacheLib, which use SSDs as block devices.
    Set a directory path on the file system in `gen_database.sh`.
-   For example, if the drive is mounted on `/media/ssd`, one can make a directory named `rocksdb_database` and set:
+   For example, if the drive is mounted on `/media/ssd`, one can make a directory named `rocksdb_database` there and set:
    ```
    SSD_PATH=/media/ssd/rocksdb_database
    ```
    Then, run the script
    ```
-   nohup bash ./gen_database.sh &
+   nohup bash gen_database.sh &
    ```
    which will generate a database consisting of 1 billion items (totaling around 400 GB in size) under the specified path.
    This will take a few hours.
@@ -277,7 +277,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
    nohup python3 batch.py &
    ```
    which will run benchmarks with various settings.
-   This will take more than ten hours.
+   This can take more than ten hours.
 
 1. Check the results
 
