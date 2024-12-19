@@ -7,6 +7,7 @@ This repository contains code to evaluate the following three pieces of software
 * Microbenchmark
 * [Modified Aerospike](https://github.com/ybandy/aerospike-server)
 * [Modified CacheLib](https://github.com/ybandy/CacheLib)
+* [Modified RocksDB](https://github.com/ybandy/rocksdb)
 
 
 ## System Requirements
@@ -237,10 +238,56 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
    Open and run Jupyter Notebook `notebooks/cachelib.ipynb`
 
 
+## Modified RocksDB
+
+1. Build
+
+   ```
+   cd rocksdb
+   ./build.sh
+   ```
+
+1. Generate a database
+
+   Set up a file system on an SSD (or on RAIDed SSDs), as RocksDB needs one in contrast to Aerospike and CacheLib, which use SSDs as block devices.
+   Set a directory path on the file system in `gen_database.sh`.
+   For example, if the drive is mounted on `/media/ssd`, one can make a directory named `rocksdb_database` and set:
+   ```
+   SSD_PATH=/media/ssd/rocksdb_database
+   ```
+   Then, run the script
+   ```
+   nohup bash ./gen_database.sh &
+   ```
+   which will generate a database consisting of 1 billion items (totaling around 400 GB in size) under the specified path.
+   This will take a few hours.
+
+1. Run the benchmarks
+
+   Set the path to the generated database in `batch.py`.
+   ```
+   SSD_PATH = '/media/ssd/rocksdb_database'
+   ```
+   and specify a node mask. If you want to interleave Nodes 2 and 3,
+   ```
+   CXL_NODEMASK = (1 << 2) | (1 << 3)
+   ```
+   Then, run the script
+   ```
+   nohup python3 batch.py &
+   ```
+   which will run benchmarks with various settings.
+   This will take more than ten hours.
+
+1. Check the results
+
+   Open and run Jupyter Notebook `notebooks/rocksdb.ipynb`
+
+
 ## Other Results
 
 If all the results so far have been obtained, open and run Jupyter Notebook `notebooks/multicore.ipynb`
-to plot throughputs of both Aerospike and CacheLib for varying number of cores.
+to plot throughputs of Aerospike, CacheLib, and RocksDB for varying number of cores.
 
 Jupyter Notebook `notebooks/model.ipynb` is a stand-alone notebook that can be run without evaluation logs.
 It produces heatmaps showing throughput dependency on memory latency according to a theoretical model.
