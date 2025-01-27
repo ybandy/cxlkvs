@@ -3,7 +3,7 @@
 We study the possibility of displacing most of in-memory data structures of SSD-based KV stores
 from the host DRAM to CXL memory with microsecond-level latency, and still achieving competitive KV throughputs.
 
-This repository contains code to evaluate the following three pieces of software.
+This repository contains code to evaluate the following four pieces of software.
 * Microbenchmark
 * [Modified Aerospike](https://github.com/ybandy/aerospike-server)
 * [Modified CacheLib](https://github.com/ybandy/CacheLib)
