@@ -1,13 +1,13 @@
-# SSD-Based Key-Value Stores on Microsecond-Latency CXL Memory
+# Analysis and Evaluation of Microsecond-Latency Memory Adoption in SSD-Based Key-Value Stores
 
 We study the possibility of displacing most of in-memory data structures of SSD-based KV stores
-from the host DRAM to CXL memory with microsecond-level latency, and still achieving competitive KV throughputs.
+from the host DRAM to secondary memory with microsecond-level latency, and still achieving competitive KV throughputs.
 
 This repository contains code to evaluate the following four pieces of software.
 * Microbenchmark
-* [Modified Aerospike](https://github.com/ybandy/aerospike-server)
-* [Modified CacheLib](https://github.com/ybandy/CacheLib)
-* [Modified RocksDB](https://github.com/ybandy/rocksdb)
+* Modified Aerospike
+* Modified CacheLib
+* Modified RocksDB
 
 
 ## System Requirements
@@ -17,7 +17,7 @@ The code assumes that
 * Latency of the memory can be adjusted
 
 The computational environment we tested is as follows.
-We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjustable latency.
+The FPGAs work as secondary memory with adjustable latency.
 
 |Part     |Specifications |
 |---------|---------------|
@@ -32,7 +32,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 
 1. Setup long latency memory as NUMA nodes
 
-   This depends on your environment, and the memory does not necessarily need to be CXL memory.
+   This depends on your environment.
    The latency of the memory needs to be adjustable and the code assumes that a script for setting latency is provided at home.
    ```
    ~/set_latency.sh <latency_nsec>
@@ -124,16 +124,16 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
      For instance, in an environment with
      * Node 0: host DRAM (CPU 0)
      * Node 1: host DRAM (CPU 1)
-     * Node 2: CXL memory device 0
-     * Node 3: CXL memory device 1
+     * Node 2: secondary memory device 0
+     * Node 3: secondary memory device 1
      
-     Node mask will be 1 (= 1 << 0) for the host DRAM, and 12 (= 1 << 2 | 1 << 3) for the (interleaved) CXL memory devices.
+     Node mask will be 1 (= 1 << 0) for the host DRAM, and 12 (= 1 << 2 | 1 << 3) for the (interleaved) secondary memory devices.
 
 1. Select a benchmark config file and edit it as necessary
 
    The naming convention is `run-act-<workload>-<memory>-<N>core.conf`, where
    * `<workload>`: `ro` for read-only workload, `rw` for read-write-mix workload
-   * `<memory>`: `dram` for DRAM, `cxl` for CXL memory
+   * `<memory>`: `dram` for DRAM, `cxl` for secondary memory
    * `<N>`: the number of CPU cores
   
    `SERVER_CPU_LIST` and `CLIENT_CPU_LIST` may need to be edited so that servers work on CPU 0 and clients on CPU 1.
@@ -177,7 +177,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
 
    The naming convention is `cachelib-benchmark<workload>-<memory>-<N>core-<M>fiber.conf` where
    * `<workload>`: ` ` (empty) for the smaller workload, `-x4` for the larger workload
-   * `<memory>`: `dram` for DRAM, `cxl` for CXL memory
+   * `<memory>`: `dram` for DRAM, `cxl` for secondary memory
    * `<N>`: the number of CPU cores
    * `<M>`: the number of threads (fibers) per core
 
@@ -211,7 +211,7 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
    killall cachebench
    ```
 
-   If placing the RAM cache on the CXL memory, run
+   If placing the RAM cache on the secondary memory, run
    ```
    bash ~/set_latency.sh 1
    nohup taskset -c <cpu_list> bash benchmark.sh cachelib-benchmark<workload>-cxl-<N>core-<M>fiber.conf &
