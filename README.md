@@ -1,4 +1,4 @@
-# Analysis and Evaluation of Microsecond-Latency Memory Adoption in SSD-Based Key-Value Stores
+# Analysis and Evaluation of Using Microsecond-Latency Memory for In-Memory Indices and Caches in SSD-Based Key-Value Stores
 
 We study the possibility of displacing most of in-memory data structures of SSD-based KV stores
 from the host DRAM to secondary memory with microsecond-level latency, and still achieving competitive KV throughputs.
