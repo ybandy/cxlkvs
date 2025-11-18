@@ -72,6 +72,12 @@ We use CXL-enabled CPUs and FPGAs, and the FPGAs work as CXL memory with adjusta
    sudo cpupower frequency-set -g performance
    ```
 
+1. Install packages
+
+   ```
+   sudo apt install libssl-dev libuv1-dev libgflags-dev libaio-dev libcurl4-openssl-dev valgrind
+   ```
+   
 ## Microbenchmark
 
 1. Build
