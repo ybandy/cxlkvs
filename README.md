@@ -1,7 +1,10 @@
-# SSD-Based Key-Value Stores on Microsecond-Latency CXL Memory
+# CXL-KVS: SSD-Based Key-Value Stores on Microsecond-Latency CXL Memory
 
 We study the possibility of displacing most of in-memory data structures of SSD-based KV stores
 from the host DRAM to CXL memory with microsecond-level latency, and still achieving competitive KV throughputs.
+The results are published in [the following paper](https://dl.acm.org/doi/10.1145/3769759).
+
+Yosuke Bando, Akinobu Mita, Kazuhiro Hiwada, Shintaro Sano, Tomoya Suzuki, Yu Nakanishi, Kazutaka Tomida, Hirotsugu Kajihara, Akiyuki Kaneko, Daisuke Taki, Yukimasa Miyamoto, Tomokazu Yoshida, and Tatsuo Shiozawa. "Analysis and Evaluation of Using Microsecond-Latency Memory for In-Memory Indices and Caches in SSD-Based Key-Value Stores." Proceedings of the ACM on Management of Data (Proc. SIGMOD 2026), 3(6):294:1-294:28, 2025.
 
 This repository contains code to evaluate the following four pieces of software.
 * Microbenchmark
